@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Faça e acompanhe seus pedidos na LUX.">
+    <meta name="theme-color" content="#003153">
+    <title>Pedidos | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="pedidos.html" aria-current="page">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container">
+            <p class="etiqueta">Pedidos</p>
+            <div class="titulo-linha">
+                <h1>Olá, <span data-nome>…</span></h1>
+                <button class="botao botao-contorno botao-pequeno" type="button" data-sair>Sair</button>
+            </div>
+            <p class="destaque">Faça um novo pedido e acompanhe o status de cada um.</p>
+            <p data-link-admin hidden><a class="botao" href="admin.html">Abrir painel do administrador <span aria-hidden="true">→</span></a></p>
+
+            <div class="pedidos-grade" data-pedidos>
+                <section class="painel" aria-labelledby="titulo-novo">
+                    <h2 id="titulo-novo">Novo pedido</h2>
+                    <form class="formulario" data-form="/api/pedidos" novalidate>
+                        <div class="campo">
+                            <label for="servico">Serviço</label>
+                            <select id="servico" name="servico">
+                                <option>Criação de sites</option>
+                                <option>Correção de erros</option>
+                                <option>Programação em geral</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="titulo">Título</label>
+                            <input id="titulo" name="titulo" type="text" required minlength="3" maxlength="120" placeholder="Ex.: Site para minha loja" aria-describedby="erro-titulo">
+                            <p class="erro" id="erro-titulo" hidden><span aria-hidden="true">⚠</span> Dê um título com pelo menos 3 letras.</p>
+                        </div>
+                        <div class="campo">
+                            <label for="descricao">Descrição</label>
+                            <textarea id="descricao" name="descricao" rows="5" required minlength="10" maxlength="3000" aria-describedby="erro-descricao"></textarea>
+                            <p class="erro" id="erro-descricao" hidden><span aria-hidden="true">⚠</span> Descreva o pedido com pelo menos 10 caracteres.</p>
+                        </div>
+                        <button class="botao" type="submit">Enviar pedido <span aria-hidden="true">→</span></button>
+                        <p class="aviso" role="status" data-status></p>
+                    </form>
+                </section>
+
+                <section aria-labelledby="titulo-lista">
+                    <h2 id="titulo-lista">Meus pedidos</h2>
+                    <p class="vazio" data-vazio>Carregando…</p>
+                    <ul class="lista-pedidos" data-lista></ul>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

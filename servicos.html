@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Serviços da LUX: criação de sites, correção de erros e serviços gerais de programação.">
+    <meta name="theme-color" content="#003153">
+    <title>Serviços | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="servicos.html" aria-current="page">Serviços</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="pedidos.html">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container">
+            <p class="etiqueta">Serviços</p>
+            <h1>O que fazemos</h1>
+            <p class="destaque">Escolha um serviço para ver os detalhes.</p>
+
+            <div class="abas" data-abas>
+                <div class="abas-lista" role="tablist" aria-label="Serviços da LUX">
+                    <button type="button" role="tab" id="aba-sites" aria-controls="painel-sites" aria-selected="true">Criação de sites</button>
+                    <button type="button" role="tab" id="aba-erros" aria-controls="painel-erros" aria-selected="false">Correção de erros</button>
+                    <button type="button" role="tab" id="aba-geral" aria-controls="painel-geral" aria-selected="false">Programação em geral</button>
+                </div>
+
+                <section class="painel" role="tabpanel" id="painel-sites" aria-labelledby="aba-sites" tabindex="0">
+                    <h2>Criação de sites</h2>
+                    <p>Criamos o seu site do zero: da ideia até a publicação. Rápido, bonito e funcionando bem no celular, no tablet e no computador.</p>
+                    <ul class="lista-check">
+                        <li>Sites institucionais, portfólios e landing pages</li>
+                        <li>Layout responsivo para qualquer tamanho de tela</li>
+                        <li>Acessibilidade e boas práticas desde o início</li>
+                        <li>Ajuda com domínio, hospedagem e publicação</li>
+                    </ul>
+                    <a class="botao" href="contato.html?servico=Cria%C3%A7%C3%A3o%20de%20sites">Quero um site <span aria-hidden="true">→</span></a>
+                </section>
+
+                <section class="painel" role="tabpanel" id="painel-erros" aria-labelledby="aba-erros" tabindex="0">
+                    <h2>Correção de erros</h2>
+                    <p>O seu site ou sistema parou de funcionar, está lento ou se comporta de um jeito estranho? Nós encontramos a causa e resolvemos.</p>
+                    <ul class="lista-check">
+                        <li>Diagnóstico e correção de bugs</li>
+                        <li>Páginas quebradas ou desalinhadas no celular</li>
+                        <li>Melhoria de desempenho e velocidade</li>
+                        <li>Explicação clara do que estava errado</li>
+                    </ul>
+                    <a class="botao" href="contato.html?servico=Corre%C3%A7%C3%A3o%20de%20erros">Preciso de um conserto <span aria-hidden="true">→</span></a>
+                </section>
+
+                <section class="painel" role="tabpanel" id="painel-geral" aria-labelledby="aba-geral" tabindex="0">
+                    <h2>Programação em geral</h2>
+                    <p>Tem uma necessidade que envolve código e não sabe por onde começar? Conte para a gente: prestamos serviços de programação sob medida.</p>
+                    <ul class="lista-check">
+                        <li>Novas funcionalidades em projetos existentes</li>
+                        <li>Automação de tarefas repetitivas</li>
+                        <li>Manutenção e atualização de sistemas</li>
+                        <li>Consultoria e orientação técnica</li>
+                    </ul>
+                    <a class="botao" href="contato.html?servico=Programa%C3%A7%C3%A3o%20em%20geral">Conte sua ideia <span aria-hidden="true">→</span></a>
+                </section>
+            </div>
+        </section>
+
+        <section class="secao container" aria-labelledby="titulo-como">
+            <h2 id="titulo-como">Como funciona</h2>
+            <ol class="grade passos">
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">1</span>
+                    <h3>Conversa</h3>
+                    <p>Você conta o que precisa e nós tiramos as dúvidas.</p>
+                </li>
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">2</span>
+                    <h3>Proposta</h3>
+                    <p>Enviamos escopo, prazo e valor de forma clara.</p>
+                </li>
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">3</span>
+                    <h3>Entrega</h3>
+                    <p>Desenvolvemos, testamos e entregamos com acompanhamento.</p>
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conheça a LUX: quem somos e como trabalhamos.">
+    <meta name="theme-color" content="#003153">
+    <title>Sobre | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html" aria-current="page">Sobre</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="pedidos.html">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container estreito">
+            <p class="etiqueta">Sobre</p>
+            <h1>Quem nós somos</h1>
+            <p class="destaque">A LUX nasceu de uma ideia simples: tecnologia não precisa ser um caminho escuro.</p>
+            <p>Somos uma equipe de programadores que presta serviços de desenvolvimento para pessoas e pequenos negócios. Criamos sites, corrigimos erros em projetos que já existem e ajudamos em tudo o que envolve programação — sempre explicando cada passo em linguagem clara, sem termos complicados.</p>
+            <p>O nosso nome vem do latim e significa <strong>luz</strong>. É isso que queremos ser para quem nos procura: a luz que mostra onde está o problema, qual é a solução e qual é o próximo passo. Por isso o nosso slogan é <em lang="en">Clarify your path</em> — clareie seu caminho.</p>
+        </section>
+
+        <section class="secao container" aria-labelledby="titulo-valores">
+            <h2 id="titulo-valores">No que acreditamos</h2>
+            <ul class="grade">
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">01</span>
+                    <h3>Clareza</h3>
+                    <p>Você sabe o que está sendo feito, quanto custa e quando fica pronto.</p>
+                </li>
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">02</span>
+                    <h3>Qualidade</h3>
+                    <p>Código limpo, sites rápidos e que funcionam bem em qualquer tela.</p>
+                </li>
+                <li class="cartao">
+                    <span class="cartao-icone" aria-hidden="true">03</span>
+                    <h3>Acessibilidade</h3>
+                    <p>Projetos pensados para todas as pessoas, incluindo quem tem daltonismo ou baixa visão.</p>
+                </li>
+            </ul>
+        </section>
+
+        <section class="secao container chamada">
+            <h2>Quer saber o que podemos fazer por você?</h2>
+            <div class="acoes">
+                <a class="botao" href="servicos.html">Ver serviços <span aria-hidden="true">→</span></a>
+                <a class="botao botao-contorno" href="contato.html">Fale com a gente</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

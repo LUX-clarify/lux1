@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crie sua conta na LUX para fazer e acompanhar pedidos.">
+    <meta name="theme-color" content="#003153">
+    <title>Cadastro | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                    <li><a href="cadastro.html" aria-current="page">Cadastro</a></li>
+                    <li><a href="pedidos.html">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container estreito">
+            <p class="etiqueta">Cadastro</p>
+            <h1>Sua conta LUX</h1>
+            <p class="destaque">Crie uma conta para fazer pedidos e acompanhar o andamento de cada um.</p>
+
+            <div class="painel" data-conectado hidden>
+                <p>Você está conectado como <strong data-nome></strong>.</p>
+                <div class="acoes">
+                    <a class="botao" href="pedidos.html">Ver meus pedidos <span aria-hidden="true">→</span></a>
+                    <button class="botao botao-contorno" type="button" data-sair>Sair</button>
+                </div>
+            </div>
+
+            <div class="abas" data-abas data-acesso>
+                <div class="abas-lista" role="tablist" aria-label="Acesso à conta">
+                    <button type="button" role="tab" id="aba-criar" aria-controls="painel-criar" aria-selected="true">Criar conta</button>
+                    <button type="button" role="tab" id="aba-entrar" aria-controls="painel-entrar" aria-selected="false">Já tenho conta</button>
+                </div>
+
+                <section class="painel" role="tabpanel" id="painel-criar" aria-labelledby="aba-criar">
+                    <h2>Criar conta</h2>
+                    <form class="formulario" data-form="/api/cadastro" novalidate>
+                        <div class="campo">
+                            <label for="cad-nome">Nome</label>
+                            <input id="cad-nome" name="nome" type="text" autocomplete="name" required minlength="2" maxlength="100" aria-describedby="erro-cad-nome">
+                            <p class="erro" id="erro-cad-nome" hidden><span aria-hidden="true">⚠</span> Informe o seu nome.</p>
+                        </div>
+                        <div class="campo">
+                            <label for="cad-email">E-mail</label>
+                            <input id="cad-email" name="email" type="email" autocomplete="email" required maxlength="200" aria-describedby="erro-cad-email">
+                            <p class="erro" id="erro-cad-email" hidden><span aria-hidden="true">⚠</span> Informe um e-mail válido.</p>
+                        </div>
+                        <div class="campo">
+                            <label for="cad-telefone">Telefone <span class="opcional">(opcional)</span></label>
+                            <input id="cad-telefone" name="telefone" type="tel" autocomplete="tel" maxlength="30">
+                        </div>
+                        <div class="campo">
+                            <label for="cad-senha">Senha</label>
+                            <input id="cad-senha" name="senha" type="password" autocomplete="new-password" required minlength="8" aria-describedby="dica-senha erro-cad-senha">
+                            <p class="dica" id="dica-senha">Mínimo de 8 caracteres.</p>
+                            <p class="erro" id="erro-cad-senha" hidden><span aria-hidden="true">⚠</span> A senha precisa ter pelo menos 8 caracteres.</p>
+                        </div>
+                        <button class="botao" type="submit">Criar conta <span aria-hidden="true">→</span></button>
+                        <p class="aviso" role="status" data-status></p>
+                    </form>
+                </section>
+
+                <section class="painel" role="tabpanel" id="painel-entrar" aria-labelledby="aba-entrar">
+                    <h2>Entrar</h2>
+                    <form class="formulario" data-form="/api/login" novalidate>
+                        <div class="campo">
+                            <label for="login-email">E-mail</label>
+                            <input id="login-email" name="email" type="email" autocomplete="email" required aria-describedby="erro-login-email">
+                            <p class="erro" id="erro-login-email" hidden><span aria-hidden="true">⚠</span> Informe o seu e-mail.</p>
+                        </div>
+                        <div class="campo">
+                            <label for="login-senha">Senha</label>
+                            <input id="login-senha" name="senha" type="password" autocomplete="current-password" required aria-describedby="erro-login-senha">
+                            <p class="erro" id="erro-login-senha" hidden><span aria-hidden="true">⚠</span> Informe a sua senha.</p>
+                        </div>
+                        <button class="botao" type="submit">Entrar <span aria-hidden="true">→</span></button>
+                        <p class="aviso" role="status" data-status></p>
+                    </form>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

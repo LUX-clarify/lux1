@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Entre em contato com a LUX e peça um orçamento.">
+    <meta name="theme-color" content="#003153">
+    <title>Contato | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="contato.html" aria-current="page">Contato</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="pedidos.html">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container estreito">
+            <p class="etiqueta">Contato</p>
+            <h1>Fale com a gente</h1>
+            <p class="destaque">Conte o que você precisa. Respondemos com um caminho claro.</p>
+
+            <form class="formulario" data-contato data-email="lux.provisionofservices@gmail.com" novalidate>
+                <div class="campo">
+                    <label for="nome">Nome</label>
+                    <input id="nome" name="nome" type="text" autocomplete="name" required aria-describedby="erro-nome">
+                    <p class="erro" id="erro-nome" hidden><span aria-hidden="true">⚠</span> Informe o seu nome.</p>
+                </div>
+                <div class="campo">
+                    <label for="email">E-mail</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required aria-describedby="erro-email">
+                    <p class="erro" id="erro-email" hidden><span aria-hidden="true">⚠</span> Informe um e-mail válido.</p>
+                </div>
+                <div class="campo">
+                    <label for="servico">Serviço</label>
+                    <select id="servico" name="servico">
+                        <option>Criação de sites</option>
+                        <option>Correção de erros</option>
+                        <option>Programação em geral</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="mensagem">Mensagem</label>
+                    <textarea id="mensagem" name="mensagem" rows="5" required aria-describedby="erro-mensagem"></textarea>
+                    <p class="erro" id="erro-mensagem" hidden><span aria-hidden="true">⚠</span> Escreva uma mensagem.</p>
+                </div>
+                <button class="botao" type="submit">Enviar mensagem <span aria-hidden="true">→</span></button>
+                <p class="aviso" role="status" data-status></p>
+            </form>
+
+            <p class="contato-direto">Prefere escrever direto? <a href="mailto:lux.provisionofservices@gmail.com">lux.provisionofservices@gmail.com</a></p>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>
