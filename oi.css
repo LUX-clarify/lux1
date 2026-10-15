@@ -594,22 +594,6 @@ strong {
     display: none;
 }
 
-.faixa-aviso {
-    max-width: 1040px;
-    margin: 20px auto 0;
-    margin-inline: max(20px, calc((100% - 1040px) / 2));
-    padding: 14px 18px;
-    font-weight: 600;
-    color: var(--azul);
-    background: var(--ambar);
-    border-radius: 12px;
-    overflow-wrap: anywhere;
-}
-
-.faixa-aviso a {
-    color: var(--azul);
-}
-
 /* erro do servidor: ícone ⚠ + texto branco + borda, não só cor */
 .aviso-erro {
     padding: 10px 14px;

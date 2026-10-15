@@ -96,25 +96,10 @@ if (campoServico && servicoNaUrl && Array.from(campoServico.options).some((opcao
 }
 
 // ===== Conversa com o servidor (servidor.py) =====
-const ENDERECO_SERVIDOR = 'http://localhost:8000';
-const MSG_SEM_SERVIDOR = 'O servidor da LUX não está ligado. Dê dois cliques em "iniciar.bat" (ou rode "python servidor.py") e abra ' + ENDERECO_SERVIDOR;
-
-// cadastro e pedidos só funcionam pelo servidor.py; aberto pelo arquivo ou pelo Live Server, avisa na hora
-const avisarSemServidor = () => {
-    if (document.querySelector('.faixa-aviso')) return;
-    const aviso = document.createElement('div');
-    aviso.className = 'faixa-aviso';
-    aviso.setAttribute('role', 'alert');
-    const link = document.createElement('a');
-    link.href = ENDERECO_SERVIDOR + '/' + location.pathname.split('/').pop() + location.hash;
-    link.textContent = ENDERECO_SERVIDOR;
-    aviso.append('⚠ Esta página precisa do servidor da LUX para salvar no banco de dados. Dê dois cliques em "iniciar.bat" na pasta do site e depois abra ', link, '.');
-    document.querySelector('main').prepend(aviso);
-};
+const MSG_SEM_SERVIDOR = 'Não foi possível enviar agora. Tente de novo em alguns minutos.';
 
 const api = async (caminho, dados) => {
     if (location.protocol === 'file:') {
-        avisarSemServidor();
         throw new Error(MSG_SEM_SERVIDOR);
     }
     const opcoes = dados
@@ -124,12 +109,10 @@ const api = async (caminho, dados) => {
     try {
         resposta = await fetch(caminho, opcoes);
     } catch {
-        avisarSemServidor();
         throw new Error(MSG_SEM_SERVIDOR);
     }
     // resposta que não é JSON = não foi o servidor.py que respondeu (ex.: Live Server)
     if (!(resposta.headers.get('Content-Type') || '').includes('application/json')) {
-        avisarSemServidor();
         throw new Error(MSG_SEM_SERVIDOR);
     }
     const corpo = await resposta.json().catch(() => ({}));
