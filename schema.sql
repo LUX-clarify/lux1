@@ -30,5 +30,15 @@ CREATE TABLE IF NOT EXISTS pedidos (
     criado_em   TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS mensagens (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome        TEXT    NOT NULL,
+    email       TEXT    NOT NULL,
+    servico     TEXT    NOT NULL,
+    mensagem    TEXT    NOT NULL,
+    enviado     INTEGER NOT NULL DEFAULT 0,  -- 1 = o e-mail chegou ao Gmail da LUX
+    criado_em   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_pedidos_usuario ON pedidos (usuario_id);
 CREATE INDEX IF NOT EXISTS idx_sessoes_usuario ON sessoes (usuario_id);

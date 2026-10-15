@@ -59,6 +59,7 @@
                     <div class="abas-lista" role="tablist" aria-label="Dados do painel">
                         <button type="button" role="tab" id="aba-adm-pedidos" aria-controls="painel-adm-pedidos" aria-selected="true">Pedidos</button>
                         <button type="button" role="tab" id="aba-adm-clientes" aria-controls="painel-adm-clientes" aria-selected="false">Clientes</button>
+                        <button type="button" role="tab" id="aba-adm-mensagens" aria-controls="painel-adm-mensagens" aria-selected="false">Mensagens</button>
                     </div>
 
                     <section class="painel" role="tabpanel" id="painel-adm-pedidos" aria-labelledby="aba-adm-pedidos">
@@ -72,6 +73,12 @@
                         <h2>Clientes cadastrados</h2>
                         <p class="vazio" data-vazio-clientes hidden>Nenhum cliente ainda.</p>
                         <ul class="lista-pedidos" data-admin-clientes></ul>
+                    </section>
+
+                    <section class="painel" role="tabpanel" id="painel-adm-mensagens" aria-labelledby="aba-adm-mensagens">
+                        <h2>Mensagens do contato</h2>
+                        <p class="vazio" data-vazio-mensagens hidden>Nenhuma mensagem ainda.</p>
+                        <ul class="lista-pedidos" data-admin-mensagens></ul>
                     </section>
                 </div>
             </div>

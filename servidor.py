@@ -10,19 +10,38 @@ import json
 import os
 import re
 import secrets
+import smtplib
 import sqlite3
 import sys
 import traceback
 from contextlib import contextmanager
+from email.message import EmailMessage
 from http.cookies import SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 PASTA = Path(__file__).resolve().parent
+# avisos aparecem na hora também quando a saída vai para um log (hospedagens)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(line_buffering=True)
+
+# o arquivo .env (fora do git) guarda a senha de app do Gmail: LUX_EMAIL_SENHA=xxxx xxxx xxxx xxxx
+if (PASTA / '.env').exists():
+    # utf-8-sig: o Bloco de Notas às vezes grava um BOM invisível no começo do arquivo
+    for linha in (PASTA / '.env').read_text(encoding='utf-8-sig').splitlines():
+        chave, igual, valor = linha.partition('=')
+        if igual and not linha.lstrip().startswith('#'):
+            os.environ.setdefault(chave.strip().upper(), valor.strip().strip('"\''))
+
 # LUX_BANCO e LUX_PORTA permitem rodar testes sem tocar no banco de verdade
 BANCO = Path(os.environ.get('LUX_BANCO', PASTA / 'lux.db'))
-PORTA = int(os.environ.get('LUX_PORTA', 8000))
+# hospedagens (Render, Railway...) informam a porta em PORT e precisam ouvir em todas as interfaces
+PORTA = int(os.environ.get('PORT') or os.environ.get('LUX_PORTA') or 8000)
+HOST = os.environ.get('LUX_HOST', '0.0.0.0' if os.environ.get('PORT') else '127.0.0.1')
+EMAIL_DESTINO = os.environ.get('LUX_EMAIL_DESTINO', 'lux.provisionofservices@gmail.com')
+EMAIL_USUARIO = (os.environ.get('LUX_EMAIL_USUARIO') or os.environ.get('EMAIL') or EMAIL_DESTINO).strip()
+EMAIL_SENHA = (os.environ.get('LUX_EMAIL_SENHA') or os.environ.get('SENHA') or '').replace(' ', '')
 COOKIE = 'lux_sessao'
 DIAS_SESSAO = 7
 SERVICOS = ('Criação de sites', 'Correção de erros', 'Programação em geral')
@@ -59,6 +78,52 @@ def tornar_admin(email):
         print(f'Pronto! {email} agora é administrador. Entre no site e abra /admin.html')
     else:
         print(f'Nenhuma conta com o e-mail {email}. Crie a conta no site primeiro.')
+
+
+# ===== E-mail =====
+COMO_CRIAR_SENHA = ('Crie uma SENHA DE APP (16 letras) em https://myaccount.google.com/apppasswords '
+                    '(precisa da verificação em duas etapas ligada) e coloque no .env: LUX_EMAIL_SENHA=abcd efgh ijkl mnop')
+
+
+def problema_na_senha():
+    """Explica o que há de errado com a senha do .env, ou devolve None se parece certa."""
+    if not EMAIL_SENHA:
+        return 'Falta a senha do Gmail no arquivo .env.'
+    # o Google só aceita senha de app: sempre 16 letras minúsculas, nunca a senha normal da conta
+    if not re.fullmatch(r'[a-zA-Z]{16}', EMAIL_SENHA):
+        return ('A senha no .env não é uma senha de app do Google (ela tem sempre 16 letras). '
+                'A senha normal da conta não funciona.')
+    return None
+
+
+def enviar_email(assunto, corpo, responder_para=None):
+    """Envia para EMAIL_DESTINO pelo Gmail. Devolve True se o e-mail saiu."""
+    problema = problema_na_senha()
+    if problema:
+        print(f'E-MAIL NÃO ENVIADO: {problema} {COMO_CRIAR_SENHA}')
+        return False
+    mensagem = EmailMessage()
+    mensagem['Subject'] = assunto
+    mensagem['From'] = f'Site LUX <{EMAIL_USUARIO}>'
+    mensagem['To'] = EMAIL_DESTINO
+    if responder_para:
+        mensagem['Reply-To'] = responder_para
+    mensagem.set_content(corpo)
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=20) as smtp:
+            smtp.login(EMAIL_USUARIO, EMAIL_SENHA)
+            smtp.send_message(mensagem)
+        return True
+    except smtplib.SMTPAuthenticationError:
+        print(f'E-MAIL NÃO ENVIADO: o Gmail recusou o e-mail/senha de {EMAIL_USUARIO}. {COMO_CRIAR_SENHA}')
+    except smtplib.SMTPServerDisconnected:
+        print('E-MAIL NÃO ENVIADO: o Gmail fechou a conexão no login. Isso acontece com senha que não é '
+              'senha de app ou depois de muitas tentativas erradas (espere alguns minutos). ' + COMO_CRIAR_SENHA)
+    except OSError as erro:
+        print(f'E-MAIL NÃO ENVIADO: sem conexão com o Gmail ({erro}). Verifique a internet.')
+    except Exception:
+        traceback.print_exc()
+    return False
 
 
 # ===== Senhas e sessões =====
@@ -113,6 +178,7 @@ class Lux(SimpleHTTPRequestHandler):
         ('GET', '/api/eu'): 'eu',
         ('GET', '/api/pedidos'): 'listar_pedidos',
         ('POST', '/api/pedidos'): 'criar_pedido',
+        ('POST', '/api/contato'): 'contato',
         ('GET', '/api/admin'): 'admin_dados',
         ('POST', '/api/admin/status'): 'admin_status',
     }
@@ -269,6 +335,32 @@ class Lux(SimpleHTTPRequestHandler):
         ).fetchone()
         return 201, {'pedido': dict(linha)}, None
 
+    def api_contato(self, con, dados):
+        # campo escondido: só robôs de spam preenchem
+        if texto(dados, 'site'):
+            return 201, {'ok': True}, None
+        nome, email = texto(dados, 'nome'), texto(dados, 'email').lower()
+        servico, mensagem = texto(dados, 'servico'), texto(dados, 'mensagem')
+        if not 2 <= len(nome) <= 100:
+            raise ErroApi(400, 'Informe o seu nome.')
+        if not EMAIL_VALIDO.match(email) or len(email) > 200:
+            raise ErroApi(400, 'Informe um e-mail válido.')
+        if servico not in SERVICOS:
+            servico = 'Outro'
+        if not 2 <= len(mensagem) <= 5000:
+            raise ErroApi(400, 'Escreva uma mensagem.')
+        # o e-mail sai antes de gravar no banco para não travar o SQLite durante o envio
+        enviado = enviar_email(
+            f'[LUX] {servico} — {nome}',
+            f'Nova mensagem pelo site da LUX\n\nNome: {nome}\nE-mail: {email}\nServiço: {servico}\n\n{mensagem}\n',
+            responder_para=email,
+        )
+        con.execute(
+            'INSERT INTO mensagens (nome, email, servico, mensagem, enviado) VALUES (?, ?, ?, ?, ?)',
+            (nome, email, servico, mensagem, int(enviado)),
+        )
+        return 201, {'ok': True}, None
+
     # --- administrador ---
     def administrador(self, con):
         usuario = self.usuario(con)
@@ -289,8 +381,11 @@ class Lux(SimpleHTTPRequestHandler):
                FROM pedidos p JOIN usuarios u ON u.id = p.usuario_id
                ORDER BY p.id DESC"""
         ).fetchall()
+        mensagens = con.execute(
+            'SELECT id, nome, email, servico, mensagem, enviado, criado_em FROM mensagens ORDER BY id DESC'
+        ).fetchall()
         return 200, {'clientes': [dict(c) for c in clientes], 'pedidos': [dict(p) for p in pedidos],
-                     'status': list(STATUS)}, None
+                     'mensagens': [dict(m) for m in mensagens], 'status': list(STATUS)}, None
 
     def api_admin_status(self, con, dados):
         self.administrador(con)
@@ -311,7 +406,15 @@ if __name__ == '__main__':
             sys.exit('Informe o e-mail: python servidor.py --admin seu@email.com')
         tornar_admin(sys.argv[2])
         sys.exit()
-    servidor = ThreadingHTTPServer(('127.0.0.1', PORTA), Lux)
+    # python servidor.py --testar-email  → manda um e-mail de teste para a caixa da LUX
+    if len(sys.argv) >= 2 and sys.argv[1] == '--testar-email':
+        if enviar_email('[LUX] Teste do site', 'Se você recebeu isto, o formulário de contato está funcionando.'):
+            print(f'Pronto! E-mail de teste enviado para {EMAIL_DESTINO}.')
+        sys.exit()
+    problema = problema_na_senha()
+    if problema:
+        print(f'AVISO: {problema} As mensagens de contato ficam só no painel até corrigir.\n{COMO_CRIAR_SENHA}')
+    servidor = ThreadingHTTPServer((HOST, PORTA), Lux)
     print(f'LUX rodando em http://localhost:{PORTA}  (Ctrl+C para parar)')
     try:
         servidor.serve_forever()

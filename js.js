@@ -356,6 +356,29 @@ if (painelAdmin) {
         return item;
     };
 
+    const listaMensagens = painelAdmin.querySelector('[data-admin-mensagens]');
+
+    const criarMensagem = (mensagem) => {
+        const item = criarElemento('li', 'pedido');
+        const topo = criarElemento('div', 'pedido-topo');
+        topo.append(
+            criarElemento('h3', '', mensagem.nome),
+            criarElemento('span', mensagem.enviado ? 'selo selo-concluido' : 'selo selo-recebido',
+                mensagem.enviado ? '✓ E-mail enviado' : '◷ Só no painel')
+        );
+        const email = criarElemento('a', '', mensagem.email);
+        email.href = 'mailto:' + mensagem.email;
+        const linhaEmail = criarElemento('p');
+        linhaEmail.append('Responder para: ', email);
+        item.append(
+            topo,
+            criarElemento('p', 'pedido-meta', `#${mensagem.id} · ${mensagem.servico} · ${formatarData(mensagem.criado_em)}`),
+            linhaEmail,
+            criarElemento('p', '', mensagem.mensagem)
+        );
+        return item;
+    };
+
     api('/api/eu')
         .then(({ usuario }) => {
             if (!usuario) {
@@ -369,6 +392,8 @@ if (painelAdmin) {
             dados = resposta;
             listaPedidos.replaceChildren(...dados.pedidos.map(criarPedidoAdmin));
             listaClientes.replaceChildren(...dados.clientes.map(criarCliente));
+            listaMensagens.replaceChildren(...dados.mensagens.map(criarMensagem));
+            painelAdmin.querySelector('[data-vazio-mensagens]').hidden = dados.mensagens.length > 0;
             painelAdmin.querySelector('[data-vazio-pedidos]').hidden = dados.pedidos.length > 0;
             painelAdmin.querySelector('[data-vazio-clientes]').hidden = dados.clientes.length > 0;
             contar();
@@ -386,22 +411,309 @@ const formularioContato = document.querySelector('[data-contato]');
 if (formularioContato) {
     const tudoValido = prepararValidacao(formularioContato);
 
-    formularioContato.addEventListener('submit', (evento) => {
+    const botao = formularioContato.querySelector('[type="submit"]');
+
+    formularioContato.addEventListener('submit', async (evento) => {
         evento.preventDefault();
         mostrarAviso(formularioContato, '');
         if (!tudoValido()) return;
 
-        // sem servidor: abre o aplicativo de e-mail com a mensagem pronta
-        const dados = new FormData(formularioContato);
-        const assunto = `[LUX] ${dados.get('servico')} — ${dados.get('nome')}`;
-        const corpo = `${dados.get('mensagem')}\n\n${dados.get('nome')}\n${dados.get('email')}`;
-        location.href = `mailto:${formularioContato.dataset.email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-        mostrarAviso(formularioContato, 'Abrimos o seu aplicativo de e-mail com a mensagem pronta. É só enviar!');
+        // o servidor.py envia a mensagem para o e-mail da LUX e guarda uma cópia no painel
+        botao.disabled = true;
+        try {
+            await api('/api/contato', Object.fromEntries(new FormData(formularioContato)));
+            formularioContato.reset();
+            mostrarAviso(formularioContato, 'Mensagem enviada! Vamos responder no seu e-mail em breve.');
+        } catch (erro) {
+            mostrarAviso(formularioContato, erro.message, true);
+        } finally {
+            botao.disabled = false;
+        }
     });
 }
 
+// ===== Acessibilidade (painel para PcD, em todas as páginas) =====
+const raiz = document.documentElement;
+const CHAVE_ACESSIBILIDADE = 'lux-acessibilidade';
+const ESCALAS = [100, 115, 130, 150, 175];
+
+// cada opção liga/desliga uma classe no <html>; o visual está no oi.css
+const OPCOES = [
+    { id: 'contraste', icone: '◐', titulo: 'Alto contraste', dica: 'Preto, branco e amarelo' },
+    { id: 'fonte', icone: 'Aa', titulo: 'Fonte legível', dica: 'Para dislexia e baixa visão' },
+    { id: 'espacamento', icone: '↕', titulo: 'Espaçar texto', dica: 'Mais espaço entre letras e linhas' },
+    { id: 'links', icone: '🔗', titulo: 'Destacar links', dica: 'Sublinha e contorna os links' },
+    { id: 'animacao', icone: '⏸', titulo: 'Parar animações', dica: 'Tira movimentos da tela' },
+    { id: 'cursor', icone: '➤', titulo: 'Cursor grande', dica: 'Ponteiro do mouse maior' },
+    { id: 'guia', icone: '▭', titulo: 'Guia de leitura', dica: 'Escurece tudo menos a linha do mouse' },
+    { id: 'libras', icone: '🤟', titulo: 'Libras', dica: 'Tradutor VLibras do governo' },
+];
+
+const lerPreferencias = () => {
+    try {
+        return JSON.parse(localStorage.getItem(CHAVE_ACESSIBILIDADE)) || {};
+    } catch {
+        return {};
+    }
+};
+
+const preferencias = Object.assign({ escala: 0 }, lerPreferencias());
+
+const salvarPreferencias = () => {
+    try {
+        localStorage.setItem(CHAVE_ACESSIBILIDADE, JSON.stringify(preferencias));
+    } catch {
+        // navegação anônima ou dados bloqueados: vale só nesta página
+    }
+};
+
+// --- recursos que precisam de mais do que uma classe ---
+const carregarFonteLegivel = () => {
+    if (document.getElementById('fonte-legivel')) return;
+    const link = document.createElement('link');
+    link.id = 'fonte-legivel';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap';
+    document.head.append(link);
+};
+
+const guiaCima = criarElemento('div', 'guia-leitura guia-cima');
+const guiaBaixo = criarElemento('div', 'guia-leitura guia-baixo');
+const moverGuia = (y) => {
+    guiaCima.style.height = Math.max(0, y - 36) + 'px';
+    guiaBaixo.style.top = (y + 36) + 'px';
+};
+const guiaPeloMouse = (evento) => moverGuia(evento.clientY);
+const guiaPeloToque = (evento) => moverGuia(evento.touches[0].clientY);
+
+const ligarGuia = (ligar) => {
+    guiaCima.hidden = guiaBaixo.hidden = !ligar;
+    if (ligar) {
+        if (!guiaCima.isConnected) document.body.append(guiaCima, guiaBaixo);
+        moverGuia(window.innerHeight / 2);
+        window.addEventListener('pointermove', guiaPeloMouse);
+        window.addEventListener('touchmove', guiaPeloToque, { passive: true });
+    } else {
+        window.removeEventListener('pointermove', guiaPeloMouse);
+        window.removeEventListener('touchmove', guiaPeloToque);
+    }
+};
+
+// VLibras: tradutor oficial de português para Libras (gov.br), carregado só quando pedido
+const ligarLibras = (ligar) => {
+    let caixa = document.querySelector('[vw]');
+    if (!ligar) {
+        if (caixa) caixa.hidden = true;
+        return;
+    }
+    if (caixa) {
+        caixa.hidden = false;
+        return;
+    }
+    caixa = document.createElement('div');
+    caixa.setAttribute('vw', '');
+    caixa.className = 'enabled';
+    const botaoLibras = document.createElement('div');
+    botaoLibras.setAttribute('vw-access-button', '');
+    botaoLibras.className = 'active';
+    const embrulho = document.createElement('div');
+    embrulho.setAttribute('vw-plugin-wrapper', '');
+    embrulho.append(criarElemento('div', 'vw-plugin-top-wrapper'));
+    caixa.append(botaoLibras, embrulho);
+    document.body.append(caixa);
+
+    const script = document.createElement('script');
+    script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+    script.onload = () => {
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+        // o VLibras espera o evento "load" da página, que já passou
+        if (document.readyState === 'complete') window.dispatchEvent(new Event('load'));
+    };
+    document.body.append(script);
+};
+
+const aplicarPreferencias = () => {
+    raiz.style.fontSize = ESCALAS[preferencias.escala] + '%';
+    OPCOES.forEach(({ id }) => raiz.classList.toggle('a11y-' + id, Boolean(preferencias[id])));
+    if (preferencias.fonte) carregarFonteLegivel();
+    if (document.body) {
+        ligarGuia(Boolean(preferencias.guia));
+        if (preferencias.libras || document.querySelector('[vw]')) ligarLibras(Boolean(preferencias.libras));
+    }
+};
+
+aplicarPreferencias();
+
+// --- leitura em voz alta (voz do próprio navegador) ---
+const vozDisponivel = 'speechSynthesis' in window;
+
+// textos longos são falados em pedaços: alguns navegadores param no meio de falas grandes
+const pedacosParaLer = (texto) =>
+    texto.split(/\n+/)
+        .flatMap((linha) => linha.match(/[^.!?]{1,220}[.!?]*/g) || [])
+        .map((pedaco) => pedaco.trim())
+        .filter(Boolean);
+
+// --- painel ---
+const botaoAcessibilidade = criarElemento('button', 'a11y-botao');
+botaoAcessibilidade.type = 'button';
+botaoAcessibilidade.setAttribute('aria-expanded', 'false');
+botaoAcessibilidade.setAttribute('aria-controls', 'painel-acessibilidade');
+botaoAcessibilidade.setAttribute('aria-label', 'Acessibilidade');
+botaoAcessibilidade.title = 'Acessibilidade';
+botaoAcessibilidade.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4" r="2.2"/>' +
+    '<path d="M21 9h-6v13h-2.2v-6h-1.6v6H9V9H3V6.8h18V9z"/></svg>';
+
+const painelAcessibilidade = criarElemento('div', 'a11y-painel');
+painelAcessibilidade.id = 'painel-acessibilidade';
+painelAcessibilidade.setAttribute('role', 'dialog');
+painelAcessibilidade.setAttribute('aria-labelledby', 'titulo-acessibilidade');
+painelAcessibilidade.hidden = true;
+
+const tituloAcessibilidade = criarElemento('h2', '', 'Acessibilidade');
+tituloAcessibilidade.id = 'titulo-acessibilidade';
+tituloAcessibilidade.tabIndex = -1;
+const fecharAcessibilidade = criarElemento('button', 'a11y-fechar', '✕');
+fecharAcessibilidade.type = 'button';
+fecharAcessibilidade.setAttribute('aria-label', 'Fechar acessibilidade');
+const topoAcessibilidade = criarElemento('div', 'a11y-topo');
+topoAcessibilidade.append(tituloAcessibilidade, fecharAcessibilidade);
+
+// tamanho do texto
+const linhaTamanho = criarElemento('div', 'a11y-tamanho');
+const rotuloTamanho = criarElemento('p', '', 'Tamanho do texto');
+rotuloTamanho.id = 'rotulo-tamanho';
+const grupoTamanho = criarElemento('div', 'a11y-tamanho-botoes');
+grupoTamanho.setAttribute('role', 'group');
+grupoTamanho.setAttribute('aria-labelledby', 'rotulo-tamanho');
+const diminuir = criarElemento('button', 'a11y-mini', 'A−');
+diminuir.setAttribute('aria-label', 'Diminuir texto');
+const valorTamanho = criarElemento('output', 'a11y-valor');
+valorTamanho.setAttribute('aria-live', 'polite');
+const aumentar = criarElemento('button', 'a11y-mini', 'A+');
+aumentar.setAttribute('aria-label', 'Aumentar texto');
+[diminuir, aumentar].forEach((botao) => { botao.type = 'button'; });
+grupoTamanho.append(diminuir, valorTamanho, aumentar);
+linhaTamanho.append(rotuloTamanho, grupoTamanho);
+
+const atualizarTamanho = () => {
+    valorTamanho.textContent = ESCALAS[preferencias.escala] + '%';
+    diminuir.disabled = preferencias.escala === 0;
+    aumentar.disabled = preferencias.escala === ESCALAS.length - 1;
+};
+const mudarTamanho = (passo) => {
+    preferencias.escala = Math.min(ESCALAS.length - 1, Math.max(0, preferencias.escala + passo));
+    salvarPreferencias();
+    aplicarPreferencias();
+    atualizarTamanho();
+};
+diminuir.addEventListener('click', () => mudarTamanho(-1));
+aumentar.addEventListener('click', () => mudarTamanho(1));
+
+// opções liga/desliga
+const grade = criarElemento('div', 'a11y-grade');
+const botoesOpcao = OPCOES.map((opcao) => {
+    const botao = criarElemento('button', 'a11y-opcao');
+    botao.type = 'button';
+    botao.dataset.opcao = opcao.id;
+    const textoOpcao = criarElemento('span', 'a11y-opcao-texto');
+    textoOpcao.append(criarElemento('strong', '', opcao.titulo), criarElemento('small', '', opcao.dica));
+    const icone = criarElemento('span', 'a11y-icone', opcao.icone);
+    icone.setAttribute('aria-hidden', 'true');
+    botao.append(icone, textoOpcao);
+    botao.addEventListener('click', () => {
+        preferencias[opcao.id] = !preferencias[opcao.id];
+        salvarPreferencias();
+        aplicarPreferencias();
+        botao.setAttribute('aria-pressed', String(Boolean(preferencias[opcao.id])));
+    });
+    grade.append(botao);
+    return botao;
+});
+
+// ouvir a página
+const ouvir = criarElemento('button', 'botao a11y-ouvir');
+ouvir.type = 'button';
+const textoOuvir = (falando) => {
+    ouvir.textContent = falando ? '■ Parar leitura' : '🔊 Ouvir a página';
+    ouvir.setAttribute('aria-pressed', String(falando));
+};
+textoOuvir(false);
+ouvir.hidden = !vozDisponivel;
+const dicaOuvir = criarElemento('p', 'a11y-dica', 'Dica: selecione um trecho antes para ouvir só ele.');
+dicaOuvir.hidden = !vozDisponivel;
+
+ouvir.addEventListener('click', () => {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+        textoOuvir(false);
+        return;
+    }
+    const selecionado = String(window.getSelection()).trim();
+    const pedacos = pedacosParaLer(selecionado || document.querySelector('main').innerText);
+    const voz = speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith('pt'));
+    pedacos.forEach((pedaco, indice) => {
+        const fala = new SpeechSynthesisUtterance(pedaco);
+        fala.lang = 'pt-BR';
+        if (voz) fala.voice = voz;
+        if (indice === pedacos.length - 1) fala.onend = () => textoOuvir(false);
+        speechSynthesis.speak(fala);
+    });
+    textoOuvir(pedacos.length > 0);
+});
+
+const redefinir = criarElemento('button', 'botao botao-contorno a11y-redefinir', 'Redefinir tudo');
+redefinir.type = 'button';
+redefinir.addEventListener('click', () => {
+    Object.keys(preferencias).forEach((chave) => { preferencias[chave] = false; });
+    preferencias.escala = 0;
+    salvarPreferencias();
+    aplicarPreferencias();
+    sincronizarPainel();
+});
+
+const sincronizarPainel = () => {
+    atualizarTamanho();
+    botoesOpcao.forEach((botao) => {
+        botao.setAttribute('aria-pressed', String(Boolean(preferencias[botao.dataset.opcao])));
+    });
+};
+
+painelAcessibilidade.append(topoAcessibilidade, linhaTamanho, grade, ouvir, dicaOuvir, redefinir);
+sincronizarPainel();
+
+const abrirAcessibilidade = (abrir) => {
+    painelAcessibilidade.hidden = !abrir;
+    botaoAcessibilidade.setAttribute('aria-expanded', String(abrir));
+    if (abrir) tituloAcessibilidade.focus();
+};
+
+botaoAcessibilidade.addEventListener('click', () => abrirAcessibilidade(painelAcessibilidade.hidden));
+fecharAcessibilidade.addEventListener('click', () => {
+    abrirAcessibilidade(false);
+    botaoAcessibilidade.focus();
+});
+document.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Escape' && !painelAcessibilidade.hidden) {
+        abrirAcessibilidade(false);
+        botaoAcessibilidade.focus();
+    }
+});
+document.addEventListener('click', (evento) => {
+    if (!painelAcessibilidade.hidden && !painelAcessibilidade.contains(evento.target) &&
+        !botaoAcessibilidade.contains(evento.target)) {
+        abrirAcessibilidade(false);
+    }
+});
+
+// logo depois do "Pular para o conteúdo": quem usa teclado chega no botão logo no começo
+const pularConteudo = document.querySelector('.pular');
+if (pularConteudo) pularConteudo.after(botaoAcessibilidade, painelAcessibilidade);
+else document.body.prepend(botaoAcessibilidade, painelAcessibilidade);
+
 // ===== Entrada suave ao rolar =====
-const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches || raiz.classList.contains('a11y-animacao');
 
 if (!semMovimento && 'IntersectionObserver' in window) {
     const observador = new IntersectionObserver((entradas) => {

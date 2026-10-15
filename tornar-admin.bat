@@ -5,6 +5,8 @@ echo Transforma uma conta do site em administrador.
 echo (A conta precisa ter sido criada antes pela pagina de Cadastro.)
 echo.
 set /p EMAIL=Digite o e-mail da conta:
-python servidor.py --admin "%EMAIL%"
+set PY=python
+py --version >nul 2>&1 && set PY=py
+%PY% servidor.py --admin "%EMAIL%"
 echo.
 pause

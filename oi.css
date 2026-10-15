@@ -912,3 +912,271 @@ strong {
         transform: none;
     }
 }
+
+/* ===== Acessibilidade: botão e painel (criados pelo js.js) ===== */
+.a11y-botao {
+    position: fixed;
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    color: var(--azul);
+    background: var(--ambar);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+.a11y-botao:hover {
+    background: var(--ambar-claro);
+}
+
+.a11y-botao svg {
+    width: 34px;
+    height: 34px;
+}
+
+.a11y-painel {
+    position: fixed;
+    left: 16px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    width: min(380px, calc(100vw - 32px));
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    padding: 18px;
+    color: var(--texto);
+    background: var(--azul-fundo);
+    border: 2px solid var(--ambar);
+    border-radius: var(--raio);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.a11y-topo,
+.a11y-tamanho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.a11y-topo h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.a11y-tamanho p {
+    margin: 0;
+    font-weight: 600;
+}
+
+.a11y-tamanho-botoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.a11y-valor {
+    min-width: 3.5em;
+    text-align: center;
+    font-weight: 600;
+}
+
+.a11y-fechar,
+.a11y-mini {
+    min-width: 44px;
+    min-height: 44px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--texto);
+    background: transparent;
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.a11y-fechar:hover,
+.a11y-mini:hover:not(:disabled) {
+    color: var(--ambar);
+    border-color: var(--ambar);
+}
+
+.a11y-mini:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.a11y-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.a11y-opcao {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px;
+    font: inherit;
+    text-align: left;
+    color: var(--texto);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.a11y-opcao:hover {
+    border-color: var(--ambar);
+}
+
+/* ligado = borda, fundo e um ✓ (não depende só da cor) */
+.a11y-opcao[aria-pressed="true"] {
+    background: rgba(255, 191, 0, 0.16);
+    border-color: var(--ambar);
+}
+
+.a11y-opcao[aria-pressed="true"] strong::after {
+    content: " ✓";
+}
+
+.a11y-icone {
+    flex: none;
+    width: 1.6em;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.a11y-opcao-texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.a11y-opcao strong {
+    font-size: 0.92rem;
+}
+
+.a11y-opcao small {
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+}
+
+.a11y-ouvir,
+.a11y-redefinir {
+    width: 100%;
+}
+
+.a11y-dica {
+    margin: 6px 0 12px;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+}
+
+/* o botão fixo não cobre o texto do rodapé */
+.rodape {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 360px) {
+    .a11y-grade {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Acessibilidade: modos (classes no <html>) ===== */
+.a11y-contraste {
+    --azul: #000;
+    --azul-fundo: #000;
+    --azul-claro: #000;
+    --ambar: #ffff00;
+    --ambar-claro: #ffff8a;
+    --texto: #fff;
+    --texto-suave: #fff;
+    --borda: #fff;
+}
+
+.a11y-contraste body {
+    background: #000;
+}
+
+.a11y-contraste .topo {
+    background: #000;
+    backdrop-filter: none;
+}
+
+.a11y-contraste a {
+    text-decoration: underline;
+}
+
+.a11y-fonte body,
+.a11y-fonte body * {
+    font-family: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif !important;
+}
+
+/* espaçamentos do critério 1.4.12 da WCAG */
+.a11y-espacamento body * {
+    line-height: 1.9 !important;
+    letter-spacing: 0.12em !important;
+    word-spacing: 0.16em !important;
+}
+
+.a11y-espacamento p {
+    margin-bottom: 2em;
+}
+
+.a11y-links a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+    outline: 2px dashed var(--ambar);
+    outline-offset: 3px;
+}
+
+.a11y-animacao,
+.a11y-animacao *,
+.a11y-animacao *::before,
+.a11y-animacao *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+
+.a11y-animacao .revelar {
+    opacity: 1;
+    transform: none;
+}
+
+.a11y-cursor,
+.a11y-cursor * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 10.5-6.8 1.4 4 7.2-2.8 1.5-4-7.2L4 20z' fill='%23000' stroke='%23fff' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") 8 4, auto !important;
+}
+
+.guia-leitura {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.62);
+    pointer-events: none;
+}
+
+.guia-cima {
+    top: 0;
+    border-bottom: 4px solid var(--ambar);
+}
+
+.guia-baixo {
+    bottom: 0;
+    border-top: 4px solid var(--ambar);
+}
