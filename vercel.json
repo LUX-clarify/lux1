@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/api/:rota*", "destination": "/api/index?rota=:rota*" }
+  ],
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{servidor.py,wsgi.py,schema-postgres.sql}"
+    }
+  }
+}

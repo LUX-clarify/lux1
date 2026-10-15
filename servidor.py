@@ -2,6 +2,7 @@
 
 Usa só a biblioteca padrão do Python (sem instalar nada) e um banco SQLite.
 Para rodar:  python servidor.py   e abra  http://localhost:8000
+Com DATABASE_URL definida (Vercel + Neon), usa o Postgres no lugar do SQLite (precisa do pg8000).
 """
 
 import hashlib
@@ -15,6 +16,7 @@ import sqlite3
 import sys
 import traceback
 from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from http.cookies import SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -36,6 +38,8 @@ if (PASTA / '.env').exists():
 
 # LUX_BANCO e LUX_PORTA permitem rodar testes sem tocar no banco de verdade
 BANCO = Path(os.environ.get('LUX_BANCO', PASTA / 'lux.db'))
+# na Vercel o disco é apagado a cada acesso, então o banco fica no Postgres (Neon) informado aqui
+POSTGRES_URL = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL')
 # hospedagens (Render, Railway...) informam a porta em PORT e precisam ouvir em todas as interfaces
 PORTA = int(os.environ.get('PORT') or os.environ.get('LUX_PORTA') or 8000)
 HOST = os.environ.get('LUX_HOST', '0.0.0.0' if os.environ.get('PORT') else '127.0.0.1')
@@ -50,11 +54,70 @@ EMAIL_VALIDO = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 
 # ===== Banco de dados =====
+def agora(**diferenca):
+    """Data em UTC no mesmo formato do datetime('now') do SQLite, para comparar como texto."""
+    return (datetime.now(timezone.utc) + timedelta(**diferenca)).strftime('%Y-%m-%d %H:%M:%S')
+
+
+class Postgres:
+    """Deixa o Postgres com a mesma cara do sqlite3: con.execute('... ?', (...)) e linhas por nome."""
+
+    def __init__(self, url):
+        import pg8000.dbapi
+        partes = urlsplit(url)
+        self.con = pg8000.dbapi.connect(
+            user=unquote(partes.username or ''), password=unquote(partes.password or ''),
+            host=partes.hostname, port=partes.port or 5432, database=unquote(partes.path.lstrip('/')),
+            # o Neon exige SSL; só um Postgres de teste no próprio computador usa ?sslmode=disable
+            ssl_context=None if 'sslmode=disable' in partes.query else True, timeout=15,
+        )
+
+    def execute(self, sql, parametros=()):
+        cursor = self.con.cursor()
+        # o pg8000 usa %s no lugar do ? (nenhuma consulta daqui tem ? dentro de texto)
+        cursor.execute(sql.replace('?', '%s'), tuple(parametros))
+        return Resultado(cursor)
+
+    def commit(self):
+        self.con.commit()
+
+    def close(self):
+        self.con.close()
+
+
+class Resultado:
+    def __init__(self, cursor):
+        self.cursor = cursor
+        self.rowcount = cursor.rowcount
+
+    def linha(self, valores):
+        return {coluna[0]: valor for coluna, valor in zip(self.cursor.description, valores)}
+
+    def fetchone(self):
+        valores = self.cursor.fetchone() if self.cursor.description else None
+        return valores and self.linha(valores)
+
+    def fetchall(self):
+        return [self.linha(valores) for valores in self.cursor.fetchall()] if self.cursor.description else []
+
+
+def valor_repetido(erro):
+    """True quando o banco recusou por UNIQUE (ex.: e-mail já cadastrado)."""
+    if isinstance(erro, sqlite3.IntegrityError):
+        return True
+    # o pg8000 avisa com um DatabaseError genérico; o código 23505 do Postgres é "valor repetido"
+    detalhes = erro.args[0] if erro.args else None
+    return isinstance(detalhes, dict) and detalhes.get('C') == '23505'
+
+
 @contextmanager
 def banco():
-    con = sqlite3.connect(BANCO)
-    con.row_factory = sqlite3.Row
-    con.execute('PRAGMA foreign_keys = ON')
+    if POSTGRES_URL:
+        con = Postgres(POSTGRES_URL)
+    else:
+        con = sqlite3.connect(BANCO)
+        con.row_factory = sqlite3.Row
+        con.execute('PRAGMA foreign_keys = ON')
     try:
         yield con
         con.commit()
@@ -63,6 +126,14 @@ def banco():
 
 
 def criar_banco():
+    if POSTGRES_URL:
+        with banco() as con:
+            # tira os comentários (-- ...) antes de separar os comandos pelo ;
+            script = re.sub(r'--[^\n]*', '', (PASTA / 'schema-postgres.sql').read_text(encoding='utf-8'))
+            for comando in script.split(';'):
+                if comando.strip():
+                    con.execute(comando)
+        return
     with banco() as con:
         con.executescript((PASTA / 'schema.sql').read_text(encoding='utf-8'))
         # bancos criados antes do painel de administrador não têm a coluna "admin"
@@ -146,8 +217,8 @@ def hash_token(token):
 def criar_sessao(con, usuario_id):
     token = secrets.token_urlsafe(32)
     con.execute(
-        "INSERT INTO sessoes (token_hash, usuario_id, expira_em) VALUES (?, ?, datetime('now', ?))",
-        (hash_token(token), usuario_id, f'+{DIAS_SESSAO} days'),
+        'INSERT INTO sessoes (token_hash, usuario_id, expira_em) VALUES (?, ?, ?)',
+        (hash_token(token), usuario_id, agora(days=DIAS_SESSAO)),
     )
     return f'{COOKIE}={token}; HttpOnly; SameSite=Lax; Path=/; Max-Age={DIAS_SESSAO * 86400}'
 
@@ -256,8 +327,8 @@ class Lux(SimpleHTTPRequestHandler):
         token = self.token()
         return token and con.execute(
             """SELECT u.* FROM sessoes s JOIN usuarios u ON u.id = s.usuario_id
-               WHERE s.token_hash = ? AND s.expira_em > datetime('now')""",
-            (hash_token(token),),
+               WHERE s.token_hash = ? AND s.expira_em > ?""",
+            (hash_token(token), agora()),
         ).fetchone()
 
     def usuario(self, con):
@@ -279,13 +350,14 @@ class Lux(SimpleHTTPRequestHandler):
         if not isinstance(senha, str) or not 8 <= len(senha) <= 200:
             raise ErroApi(400, 'A senha precisa ter pelo menos 8 caracteres.')
         try:
-            cursor = con.execute(
-                'INSERT INTO usuarios (nome, email, telefone, senha_hash) VALUES (?, ?, ?, ?)',
+            linha = con.execute(
+                'INSERT INTO usuarios (nome, email, telefone, senha_hash) VALUES (?, ?, ?, ?) RETURNING *',
                 (nome, email, telefone or None, gerar_hash_senha(senha)),
-            )
-        except sqlite3.IntegrityError:
-            raise ErroApi(409, 'Este e-mail já está cadastrado. Tente entrar.')
-        linha = con.execute('SELECT * FROM usuarios WHERE id = ?', (cursor.lastrowid,)).fetchone()
+            ).fetchone()
+        except Exception as erro:
+            if valor_repetido(erro):
+                raise ErroApi(409, 'Este e-mail já está cadastrado. Tente entrar.')
+            raise
         return 201, usuario_publico(linha), criar_sessao(con, linha['id'])
 
     def api_login(self, con, dados):
@@ -293,7 +365,7 @@ class Lux(SimpleHTTPRequestHandler):
         linha = con.execute('SELECT * FROM usuarios WHERE email = ?', (email,)).fetchone()
         if not linha or not isinstance(senha, str) or not senha_confere(senha, linha['senha_hash']):
             raise ErroApi(401, 'E-mail ou senha incorretos.')
-        con.execute("DELETE FROM sessoes WHERE expira_em <= datetime('now')")
+        con.execute('DELETE FROM sessoes WHERE expira_em <= ?', (agora(),))
         return 200, usuario_publico(linha), criar_sessao(con, linha['id'])
 
     def api_sair(self, con, dados):
@@ -325,13 +397,10 @@ class Lux(SimpleHTTPRequestHandler):
             raise ErroApi(400, 'Dê um título ao pedido.')
         if not 10 <= len(descricao) <= 3000:
             raise ErroApi(400, 'Descreva o pedido com pelo menos 10 caracteres.')
-        cursor = con.execute(
-            'INSERT INTO pedidos (usuario_id, servico, titulo, descricao) VALUES (?, ?, ?, ?)',
-            (usuario['id'], servico, titulo, descricao),
-        )
         linha = con.execute(
-            'SELECT id, servico, titulo, descricao, status, criado_em FROM pedidos WHERE id = ?',
-            (cursor.lastrowid,),
+            'INSERT INTO pedidos (usuario_id, servico, titulo, descricao) VALUES (?, ?, ?, ?) '
+            'RETURNING id, servico, titulo, descricao, status, criado_em',
+            (usuario['id'], servico, titulo, descricao),
         ).fetchone()
         return 201, {'pedido': dict(linha)}, None
 

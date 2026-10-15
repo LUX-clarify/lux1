@@ -52,7 +52,8 @@ def application(environ, start_response):
     topo, _, conteudo = resposta.partition(b'\r\n\r\n')
     linha_status, *linhas_cabecalho = topo.decode('latin-1').split('\r\n')
     status = linha_status.split(' ', 1)[1]
-    https = environ.get('wsgi.url_scheme') == 'https'
+    # na Vercel o HTTPS termina antes da função, que fica sabendo pelo X-Forwarded-Proto
+    https = 'https' in (environ.get('wsgi.url_scheme'), environ.get('HTTP_X_FORWARDED_PROTO'))
     saida = []
     for linha in linhas_cabecalho:
         nome, _, valor = linha.partition(': ')
