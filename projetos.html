@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Projetos futuros da LUX: o que estamos preparando.">
+    <meta name="theme-color" content="#003153">
+    <title>Projetos | LUX</title>
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="oi.css">
+    <script defer src="js.js"></script>
+</head>
+<body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topo">
+        <div class="container topo-linha">
+            <a class="marca" href="index.html" aria-label="LUX — página inicial">
+                <img src="img/logo.svg" alt="" width="40" height="40">
+                <span>LUX.</span>
+            </a>
+            <button class="menu-botao" type="button" aria-expanded="false" aria-controls="menu">
+                <span class="menu-icone" aria-hidden="true"></span>
+                <span class="menu-texto">Menu</span>
+            </button>
+            <nav id="menu" class="menu" aria-label="Principal">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="projetos.html" aria-current="page">Projetos</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="pedidos.html">Pedidos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="secao container estreito">
+            <p class="etiqueta">Projetos</p>
+            <h1>Projetos futuros</h1>
+            <p class="destaque">O que a LUX está preparando para os próximos meses.</p>
+        </section>
+
+        <section class="secao container" aria-labelledby="titulo-proximos">
+            <h2 id="titulo-proximos">Em andamento</h2>
+            <!-- para adicionar um projeto, copie um <li class="cartao"> inteiro e troque o texto -->
+            <ul class="grade">
+                <li class="cartao">
+                    <p class="etiqueta">Em breve</p>
+                    <h3>Nome do projeto</h3>
+                    <p>Uma ou duas frases explicando o que é o projeto e para quem ele é.</p>
+                </li>
+                <li class="cartao">
+                    <p class="etiqueta">Em planejamento</p>
+                    <h3>Nome do projeto</h3>
+                    <p>Uma ou duas frases explicando o que é o projeto e para quem ele é.</p>
+                </li>
+                <li class="cartao">
+                    <p class="etiqueta">Ideia</p>
+                    <h3>Nome do projeto</h3>
+                    <p>Uma ou duas frases explicando o que é o projeto e para quem ele é.</p>
+                </li>
+            </ul>
+        </section>
+
+        <section class="secao container chamada">
+            <h2>Tem uma ideia de projeto?</h2>
+            <p>Conte para a gente. A sua ideia pode ser o próximo projeto da LUX.</p>
+            <div class="acoes">
+                <a class="botao" href="contato.html">Fale com a LUX <span aria-hidden="true">→</span></a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">
+        <div class="container rodape-linha">
+            <p><strong>LUX.</strong> <span lang="en">Clarify your path</span></p>
+            <p>&copy; <span data-ano>2026</span> LUX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>
