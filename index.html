@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="LUX — criação de sites, correção de erros e serviços de programação. Clarify your path.">
-    <meta name="theme-color" content="#003153">
+    <meta name="theme-color" content="#010d18">
     <title>LUX | Clarify your path</title>
     <link rel="icon" href="img/logo.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="oi.css">
     <script defer src="js.js"></script>
+    <script type="module" src="heroi.js"></script>
 </head>
 <body>
     <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -32,7 +33,6 @@
                     <li><a href="sobre.html">Sobre</a></li>
                     <li><a href="servicos.html">Serviços</a></li>
                     <li><a href="projetos.html">Projetos</a></li>
-                    <li><a href="contato.html">Contato</a></li>
                     <li><a href="cadastro.html">Cadastro</a></li>
                     <li><a href="pedidos.html">Pedidos</a></li>
                 </ul>
@@ -41,17 +41,31 @@
     </header>
 
     <main id="conteudo">
-        <section class="heroi container">
-            <div class="heroi-logo">
-                <img src="img/logo.svg" alt="" width="220" height="220">
-            </div>
-            <div class="heroi-texto">
-                <h1>LUX.</h1>
-                <p class="slogan" lang="en">Clarify your path</p>
-                <p class="destaque">Criamos sites, corrigimos erros e resolvemos o que envolve programação — de forma simples e clara.</p>
+        <!-- herói no layout do hero-49 (originkit): fios de luz em WebGL, desenhados pelo heroi.js -->
+        <section class="heroi" aria-labelledby="titulo-heroi">
+            <canvas class="heroi-fios" aria-hidden="true"></canvas>
+            <div class="container heroi-conteudo">
+                <p class="heroi-selo"><span class="heroi-selo-marca">LUX</span> <span lang="en">Clarify your path</span></p>
+                <h1 id="titulo-heroi">Cada ideia, cada linha de código, <em>num só caminho claro.</em></h1>
+                <p class="heroi-sub">Criamos sites com o objetivo de: corrigir erros, resolver o que envolve programação e <span class="heroi-sub-destaque">explicar cada passo em linguagem clara.</span></p>
                 <div class="acoes">
-                    <a class="botao" href="servicos.html">Ver serviços <span aria-hidden="true">→</span></a>
-                    <a class="botao botao-contorno" href="contato.html">Pedir orçamento</a>
+                    <a class="botao" href="pedidos.html">Pedir orçamento <span aria-hidden="true">→</span></a>
+                    <a class="heroi-play" href="servicos.html"><span class="heroi-play-icone" aria-hidden="true"></span>Ver o que fazemos</a>
+                </div>
+                <figure class="heroi-citacao">
+                    <blockquote>
+                        <p>“O progresso do ser humano depende vitalmente da invenção. Ela é o produto mais importante do seu cérebro criativo.”</p>
+                    </blockquote>
+                    <figcaption>— Nikola Tesla, <cite>Minhas Invenções</cite> (1919)</figcaption>
+                </figure>
+                <div class="heroi-chips">
+                    <span id="titulo-chips">Fazemos</span>
+                    <ul aria-labelledby="titulo-chips">
+                        <li>Sites</li>
+                        <li>Correção de erros</li>
+                        <li>Programação</li>
+                        <li>Acessibilidade</li>
+                    </ul>
                 </div>
             </div>
         </section>

@@ -4,7 +4,8 @@
    links, abas e erros também usam sublinhado, barra, ícone ou texto. */
 :root {
     --azul: #003153;          /* azul da Prússia */
-    --azul-fundo: #021f38;
+    --azul-fundo: #010d18;    /* azul quase preto, o mesmo do herói */
+    --azul-noite: #02233d;
     --azul-claro: #0b4470;
     --ambar: #ffbf00;
     --ambar-claro: #ffd75e;
@@ -33,7 +34,7 @@ body {
     font-size: 1rem;
     line-height: 1.65;
     color: var(--texto);
-    background: var(--azul-fundo) linear-gradient(180deg, var(--azul) 0%, var(--azul-fundo) 60%) no-repeat;
+    background: var(--azul-fundo) radial-gradient(ellipse 90% 60% at 70% 0%, var(--azul-noite) 0%, var(--azul-fundo) 70%) no-repeat;
 }
 
 main {
@@ -123,7 +124,7 @@ strong {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: rgba(0, 49, 83, 0.94);
+    background: rgba(1, 13, 24, 0.9);
     border-bottom: 1px solid var(--borda);
     backdrop-filter: blur(8px);
 }
@@ -314,48 +315,194 @@ strong {
     margin-top: 1.5em;
 }
 
-/* ===== Início ===== */
+/* ===== Início: herói (layout do hero-49 do originkit, nas cores da LUX) ===== */
 .heroi {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 48px;
-    padding-block: clamp(48px, 10vw, 110px);
-}
-
-.heroi-logo {
     position: relative;
-    padding: 30px;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: clamp(620px, calc(100vh - 65px), 940px);
+    border-bottom: 1px solid var(--borda);
+    background: radial-gradient(ellipse 90% 80% at 70% 30%, var(--azul-noite) 0%, var(--azul-fundo) 75%);
 }
 
-/* brilho da luminária atrás da estrela */
-.heroi-logo::before {
-    content: "";
+/* fios de luz (WebGL): ocupam o herói todo, atrás do texto */
+.heroi-fios {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 191, 0, 0.3) 0%, rgba(255, 191, 0, 0) 68%);
-    animation: brilho 4s ease-in-out infinite;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
 }
 
-.heroi-logo img {
-    position: relative;
+.heroi-conteudo {
+    padding-block: clamp(40px, 7vh, 80px);
 }
 
-@keyframes brilho {
-    50% {
-        transform: scale(1.18);
-        opacity: 0.6;
-    }
+.heroi-selo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1.6em;
+    padding: 4px 14px 4px 4px;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    background: rgba(1, 13, 24, 0.6);
+    border: 1px solid var(--borda);
+    border-radius: 999px;
+}
+
+.heroi-selo-marca {
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--azul);
+    background: var(--ambar);
+    border-radius: 999px;
 }
 
 .heroi h1 {
+    max-width: 16ch;
     margin: 0;
-    font-size: clamp(3.5rem, 14vw, 6.5rem);
+    font-size: clamp(2.4rem, 4.6vw, 4.3rem);
     font-weight: 300;
-    letter-spacing: 0.04em;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    text-shadow: 0 2px 30px rgba(1, 13, 24, 0.8);
+}
+
+.heroi h1 em {
+    font-style: italic;
     color: var(--ambar);
-    line-height: 1;
+}
+
+.heroi-sub {
+    max-width: 34rem;
+    margin: 1.4em 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
+    color: var(--texto-suave);
+    text-shadow: 0 1px 14px #010d18;
+}
+
+.heroi-sub-destaque {
+    color: var(--ambar);
+}
+
+.heroi .acoes {
+    align-items: center;
+    gap: 14px 28px;
+    margin-top: 2.2em;
+}
+
+.heroi .botao {
+    box-shadow: 0 10px 40px rgba(255, 191, 0, 0.25);
+}
+
+/* "play" redondo + texto, como no original */
+.heroi-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    font-weight: 600;
+    color: var(--texto);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 6px;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.heroi-play:hover {
+    color: var(--ambar);
+    text-decoration-color: currentColor;
+}
+
+.heroi-play-icone {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--borda);
+    border-radius: 50%;
+    transition: border-color 0.2s ease;
+}
+
+.heroi-play:hover .heroi-play-icone {
+    border-color: var(--ambar);
+}
+
+.heroi-play-icone::before {
+    content: "";
+    width: 10px;
+    height: 12px;
+    margin-left: 3px;
+    background: var(--ambar);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* frase do Tesla */
+.heroi-citacao {
+    max-width: 32rem;
+    margin: 2em 0 0;
+    font-size: 0.95rem;
+    padding-left: 16px;
+    border-left: 2px solid var(--ambar);
+}
+
+.heroi-citacao blockquote {
+    margin: 0;
+}
+
+.heroi-citacao p {
+    margin: 0;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--texto);
+}
+
+.heroi-citacao figcaption {
+    margin-top: 0.4em;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+}
+
+/* "Fazemos" + etiquetas, como o "Reads from" do original */
+.heroi-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 2em;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+}
+
+.heroi-chips ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.heroi-chips li {
+    padding: 5px 14px;
+    color: var(--texto);
+    background: rgba(1, 13, 24, 0.55);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+}
+
+/* no alto contraste, só texto: sem fios por trás */
+.a11y-contraste .heroi {
+    background: #000;
+}
+
+.a11y-contraste .heroi-fios {
+    display: none;
 }
 
 .slogan {
@@ -856,24 +1003,18 @@ strong {
         padding: 12px 14px;
     }
 
+    /* no celular os fios ficam numa faixa no alto e o texto vem embaixo */
     .heroi {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        text-align: center;
+        display: block;
+        min-height: 0;
     }
 
-    .heroi-logo {
-        justify-self: center;
-        max-width: 200px;
-        padding: 20px;
+    .heroi-fios {
+        height: 300px;
     }
 
-    .heroi .destaque {
-        margin-inline: auto;
-    }
-
-    .heroi .acoes {
-        justify-content: center;
+    .heroi-conteudo {
+        padding-top: 250px;
     }
 
     .acoes .botao,
