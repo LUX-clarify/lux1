@@ -172,7 +172,9 @@ const iniciar = () => {
     };
 
     const ajustar = () => {
-        const { width, height } = canvas.getBoundingClientRect();
+        // tamanho de layout (sem a perspectiva do palco 3D, que encolhe e estica o retângulo na tela)
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
         if (!width || !height) return;
         escala = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = Math.round(width * escala);
@@ -259,3 +261,78 @@ const iniciar = () => {
 };
 
 if (canvas && heroi) iniciar();
+
+// ===== Palco 3D: a cena inclina com o mouse e, ao rolar, as letras vêm para a frente =====
+// O texto está 70px à frente e o fundo 280px atrás (oi.css), então ao inclinar o texto anda mais
+// que o fundo: é isso que dá a sensação de profundidade. Funciona mesmo sem WebGL.
+const ligarPalco = () => {
+    const secao = document.querySelector('.heroi');
+    const cena = secao && secao.querySelector('.heroi-cena');
+    if (!cena) return;
+
+    const menosMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const celular = window.matchMedia('(max-width: 720px)');
+    const parado = () => menosMovimento.matches || html.classList.contains('a11y-animacao');
+    const alvo = { x: 0, y: 0 };
+    const atual = { x: 0, y: 0, rolagem: 0 };
+    let rodando = false;
+    let ultimo = 0;
+
+    const aplicar = () => {
+        cena.style.setProperty('--inclina-x', `${(-atual.y * 7).toFixed(3)}deg`);
+        cena.style.setProperty('--inclina-y', `${(atual.x * 9).toFixed(3)}deg`);
+        cena.style.setProperty('--rolagem', atual.rolagem.toFixed(4));
+    };
+
+    const quadro = (agora) => {
+        if (parado() || celular.matches) {
+            atual.x = 0;
+            atual.y = 0;
+            atual.rolagem = 0;
+            aplicar();
+            rodando = false;
+            return;
+        }
+        const dt = Math.min((agora - ultimo) / 1000, 0.1);
+        ultimo = agora;
+        const caixa = secao.getBoundingClientRect();
+        const rolagem = Math.min(Math.max(-caixa.top / caixa.height, 0), 1);
+        const suave = 1 - Math.exp(-dt * 4);
+        atual.x += (alvo.x - atual.x) * suave;
+        atual.y += (alvo.y - atual.y) * suave;
+        atual.rolagem += (rolagem - atual.rolagem) * (1 - Math.exp(-dt * 10));
+        aplicar();
+        const assentou = Math.abs(alvo.x - atual.x) < 0.001 && Math.abs(alvo.y - atual.y) < 0.001
+            && Math.abs(rolagem - atual.rolagem) < 0.001;
+        if (assentou) {
+            rodando = false;
+            return;
+        }
+        requestAnimationFrame(quadro);
+    };
+    const mexer = () => {
+        if (rodando) return;
+        rodando = true;
+        ultimo = performance.now();
+        requestAnimationFrame(quadro);
+    };
+
+    secao.addEventListener('pointermove', (evento) => {
+        if (evento.pointerType !== 'mouse') return; // no toque, a cena fica reta
+        const caixa = secao.getBoundingClientRect();
+        alvo.x = (evento.clientX - caixa.left) / caixa.width - 0.5;
+        alvo.y = (evento.clientY - caixa.top) / caixa.height - 0.5;
+        mexer();
+    }, { passive: true });
+    secao.addEventListener('pointerleave', () => {
+        alvo.x = 0;
+        alvo.y = 0;
+        mexer();
+    });
+    window.addEventListener('scroll', mexer, { passive: true });
+    menosMovimento.addEventListener('change', mexer);
+    celular.addEventListener('change', mexer);
+    new MutationObserver(mexer).observe(html, { attributes: true, attributeFilter: ['class'] });
+    mexer();
+};
+ligarPalco();

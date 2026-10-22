@@ -43,29 +43,34 @@
     <main id="conteudo">
         <!-- herói no layout do hero-49 (originkit): fios de luz em WebGL, desenhados pelo heroi.js -->
         <section class="heroi" aria-labelledby="titulo-heroi">
-            <canvas class="heroi-fios" aria-hidden="true"></canvas>
-            <div class="container heroi-conteudo">
-                <p class="heroi-selo"><span class="heroi-selo-marca">LUX</span> <span lang="en">Clarify your path</span></p>
-                <h1 id="titulo-heroi">Cada ideia, cada linha de código, <em>num só caminho claro.</em></h1>
-                <p class="heroi-sub">Criamos sites com o objetivo de: corrigir erros, resolver o que envolve programação e <span class="heroi-sub-destaque">explicar cada passo em linguagem clara.</span></p>
-                <div class="acoes">
-                    <a class="botao" href="pedidos.html">Pedir orçamento <span aria-hidden="true">→</span></a>
-                    <a class="heroi-play" href="servicos.html"><span class="heroi-play-icone" aria-hidden="true"></span>Ver o que fazemos</a>
+            <!-- palco 3D: o fundo fica lá atrás e o texto flutua na frente (heroi.js inclina com o mouse) -->
+            <div class="heroi-cena">
+                <div class="heroi-fundo" aria-hidden="true">
+                    <canvas class="heroi-fios"></canvas>
                 </div>
-                <figure class="heroi-citacao">
-                    <blockquote>
-                        <p>“O progresso do ser humano depende vitalmente da invenção. Ela é o produto mais importante do seu cérebro criativo.”</p>
-                    </blockquote>
-                    <figcaption>— Nikola Tesla, <cite>Minhas Invenções</cite> (1919)</figcaption>
-                </figure>
-                <div class="heroi-chips">
-                    <span id="titulo-chips">Fazemos</span>
-                    <ul aria-labelledby="titulo-chips">
-                        <li>Sites</li>
-                        <li>Correção de erros</li>
-                        <li>Programação</li>
-                        <li>Acessibilidade</li>
-                    </ul>
+                <div class="container heroi-conteudo">
+                    <p class="heroi-selo"><span class="heroi-selo-marca">LUX</span> <span lang="en">Clarify your path</span></p>
+                    <h1 id="titulo-heroi">Cada ideia, cada linha de código, <em>num só caminho claro.</em></h1>
+                    <p class="heroi-sub">Criamos sites com o objetivo de: corrigir erros, resolver o que envolve programação e <span class="heroi-sub-destaque">explicar cada passo em linguagem clara.</span></p>
+                    <div class="acoes">
+                        <a class="botao" href="pedidos.html">Pedir orçamento <span aria-hidden="true">→</span></a>
+                        <a class="heroi-play" href="servicos.html"><span class="heroi-play-icone" aria-hidden="true"></span>Ver o que fazemos</a>
+                    </div>
+                    <figure class="heroi-citacao">
+                        <blockquote>
+                            <p>“O progresso do ser humano depende vitalmente da invenção. Ela é o produto mais importante do seu cérebro criativo.”</p>
+                        </blockquote>
+                        <figcaption>— Nikola Tesla, <cite>Minhas Invenções</cite> (1919)</figcaption>
+                    </figure>
+                    <div class="heroi-chips">
+                        <span id="titulo-chips">Fazemos</span>
+                        <ul aria-labelledby="titulo-chips">
+                            <li>Sites</li>
+                            <li>Correção de erros</li>
+                            <li>Programação</li>
+                            <li>Acessibilidade</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>

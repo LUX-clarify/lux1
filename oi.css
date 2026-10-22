@@ -325,19 +325,63 @@ strong {
     min-height: clamp(620px, calc(100vh - 65px), 940px);
     border-bottom: 1px solid var(--borda);
     background: radial-gradient(ellipse 90% 80% at 70% 30%, var(--azul-noite) 0%, var(--azul-fundo) 75%);
+    /* palco 3D: quanto menor, mais forte a profundidade */
+    perspective: 1100px;
+    perspective-origin: 50% 40%;
 }
 
-/* fios de luz (WebGL): ocupam o herói todo, atrás do texto */
+/* a cena inteira inclina com o mouse (o heroi.js muda --inclina-x/-y e --rolagem) */
+.heroi-cena {
+    --inclina-x: 0deg;
+    --inclina-y: 0deg;
+    --rolagem: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--inclina-x)) rotateY(var(--inclina-y));
+}
+
+/* fundo lá atrás: afundado 280px; a escala devolve o tamanho (1100 / (1100 - 280) ≈ 1.255)
+   e a sobra de 8% cobre as bordas quando a cena inclina */
+.heroi-fundo {
+    position: absolute;
+    inset: -8%;
+    transform: translateZ(calc(-280px - var(--rolagem) * 160px)) scale(calc(1.255 + var(--rolagem) * 0.18));
+    animation: heroi-afasta 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 .heroi-fios {
     position: absolute;
     inset: 0;
-    z-index: -1;
     width: 100%;
     height: 100%;
 }
 
+/* texto na frente: flutua 70px à frente e vem mais ainda ao rolar a página.
+   A escala desfaz o aumento da perspectiva (1030 / 1100): parado, o texto fica em 100% e nítido */
 .heroi-conteudo {
+    position: relative;
     padding-block: clamp(40px, 7vh, 80px);
+    transform: translateZ(calc(70px + var(--rolagem) * 150px)) scale(0.9364);
+    opacity: calc(1 - var(--rolagem) * 0.7);
+    animation: heroi-chega 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
+}
+
+/* ao abrir: o fundo começa perto e recua; as letras saem de trás e vêm para a frente */
+@keyframes heroi-afasta {
+    from {
+        translate: 0 0 240px;
+        opacity: 0.2;
+    }
+}
+
+@keyframes heroi-chega {
+    from {
+        translate: 0 0 -420px;
+        opacity: 0;
+    }
 }
 
 .heroi-selo {
@@ -370,7 +414,8 @@ strong {
     font-weight: 300;
     line-height: 1.06;
     letter-spacing: -0.03em;
-    text-shadow: 0 2px 30px rgba(1, 13, 24, 0.8);
+    /* sombra de elevação: as letras parecem soltas do fundo */
+    text-shadow: 0 2px 30px rgba(1, 13, 24, 0.8), 0 22px 38px rgba(0, 0, 0, 0.55);
 }
 
 .heroi h1 em {
@@ -1003,14 +1048,26 @@ strong {
         padding: 12px 14px;
     }
 
-    /* no celular os fios ficam numa faixa no alto e o texto vem embaixo */
+    /* no celular os fios ficam numa faixa no alto e o texto vem embaixo; sem inclinar */
     .heroi {
         display: block;
         min-height: 0;
     }
 
-    .heroi-fios {
+    .heroi-cena {
+        display: block;
+        transform: none;
+    }
+
+    .heroi-fundo {
+        inset: 0 0 auto;
         height: 300px;
+        transform: none;
+    }
+
+    .heroi-conteudo {
+        transform: none;
+        opacity: 1;
     }
 
     .heroi-conteudo {
